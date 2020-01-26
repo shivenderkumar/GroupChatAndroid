@@ -29,7 +29,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.nkzawa.emitter.Emitter;
-import com.github.nkzawa.socketio.client.Socket;
+import com.github.nkzawa.engineio.client.transports.WebSocket;
+//import com.github.nkzawa.socketio.client.Socket;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -53,7 +54,7 @@ public class MainFragment extends Fragment {
     private boolean mTyping = false;
     private Handler mTypingHandler = new Handler();
     private String mUsername;
-    private Socket mSocket;
+    private WebSocket mSocket;
 
     private Boolean isConnected = true;
 
@@ -74,16 +75,15 @@ public class MainFragment extends Fragment {
 
         GroupChatApp app = (GroupChatApp) getActivity().getApplication();
         mSocket = app.getSocket();
-        mSocket.on(Socket.EVENT_CONNECT,onConnect);
-        mSocket.on(Socket.EVENT_DISCONNECT,onDisconnect);
-        mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+        mSocket.on(WebSocket.EVENT_OPEN,onConnect);
+        mSocket.on(WebSocket.EVENT_CLOSE,onDisconnect);
+        mSocket.on(WebSocket.EVENT_ERROR, onConnectError);
         mSocket.on("new message", onNewMessage);
         mSocket.on("user joined", onUserJoined);
         mSocket.on("user left", onUserLeft);
         mSocket.on("typing", onTyping);
         mSocket.on("stop typing", onStopTyping);
-        mSocket.connect();
+      //  mSocket.connect();
 
         startSignIn();
 
@@ -124,12 +124,12 @@ public class MainFragment extends Fragment {
 
         super.onDestroy();
 
-        mSocket.disconnect();
+        mSocket.close();
 
-        mSocket.off(Socket.EVENT_CONNECT, onConnect);
-        mSocket.off(Socket.EVENT_DISCONNECT, onDisconnect);
-        mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+        mSocket.off(WebSocket.EVENT_OPEN, onConnect);
+        mSocket.off(WebSocket.EVENT_CLOSE, onDisconnect);
+        mSocket.off(WebSocket.EVENT_ERROR, onConnectError);
+       // mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
         mSocket.off("new message", onNewMessage);
         mSocket.off("user joined", onUserJoined);
         mSocket.off("user left", onUserLeft);
@@ -164,7 +164,7 @@ public class MainFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (null == mUsername) return;
-                if (!mSocket.connected()) return;
+              //  if (!mSocket.connected()) return;
 
                 if (!mTyping) {
                     mTyping = true;
@@ -269,7 +269,7 @@ public class MainFragment extends Fragment {
 
     private void attemptSend() {
         if (null == mUsername) return;
-        if (!mSocket.connected()) return;
+       // if (!mSocket.connected()) return;
 
         mTyping = false;
 
@@ -294,8 +294,8 @@ public class MainFragment extends Fragment {
 
     private void leave() {
         mUsername = null;
-        mSocket.disconnect();
-        mSocket.connect();
+        mSocket.close();
+        mSocket.open();
         startSignIn();
     }
 

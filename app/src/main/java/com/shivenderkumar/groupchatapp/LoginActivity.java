@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.engineio.client.transports.WebSocket;
 import com.github.nkzawa.socketio.client.Socket;
 
 import org.json.JSONException;
@@ -24,7 +25,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private String mUsername;
 
-    private Socket mSocket;
+    private WebSocket mSocket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
